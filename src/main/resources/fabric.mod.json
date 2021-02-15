@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "eki_lib",
+  "version": "1.0.20",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "com.chaos.eki_lib.EkiLib"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "com.chaos.eki_lib.EkiLibClient"
+      }
+    ]
+  },
+  "depends": {
+    "fabric-language-kotlin": ">=1.4.30",
+    "fabric-key-binding-api-v1": "*"
+  }
+}
