@@ -3,6 +3,7 @@ package com.chaos.eki_lib.station.data
 import com.chaos.eki_lib.utils.TagFacts
 import com.chaos.eki_lib.utils.extensions.UtilBlockPos
 import com.chaos.eki_lib.utils.extensions.asArray
+import com.chaos.eki_lib.utils.extensions.format
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.util.Identifier
@@ -46,4 +47,6 @@ data class Station(var name: String, val pos: BlockPos, var level: StationLevel,
 
         return byteBuf
     }
+
+    fun format(): String = "$name - ${pos.format()}"
 }

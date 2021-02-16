@@ -1,6 +1,8 @@
 package com.chaos.eki_lib
 
 import com.chaos.eki_lib.station.StationWorldData
+import com.chaos.eki_lib.station.data.OpCode
+import com.chaos.eki_lib.station.data.Station
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.ModInitializer
@@ -23,10 +25,34 @@ object EkiLib : ModInitializer {
         ) { context, _ ->
             context.taskQueue.execute {
                 val data = PacketByteBuf(Unpooled.buffer())
-                data.writeInt(StationManager.stations.size)
-                StationManager.stations.forEach { it.toByteBuf(data) }
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(context.player, S2C_SERVER_RETURN_STATION_LIST, data)
+                val stations = StationManager.getStationList()
+
+                data.writeInt(stations.size)
+                stations.forEach { it.toByteBuf(data); println(it) }
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                    context.player,
+                    S2C_SERVER_RETURN_STATION_LIST,
+                    data
+                )
             }
+        }
+
+        ServerSidePacketRegistry.INSTANCE.register(
+            EkiLibClient.C2S_CLIENT_UPDATE_STATIONS
+        ) { context, data ->
+            val opCode = data.readEnumConstant(OpCode::class.java)
+            val station = Station.fromByteBuf(data)
+
+            context.taskQueue.execute {
+                when (opCode) {
+                    OpCode.ADD -> StationManager.addStation(station)
+                    OpCode.REPLACE -> StationManager.replaceStation(station)
+                    OpCode.DELETE -> StationManager.removeStation(station.pos)
+                    else -> println("Unknown Operation to Station Manager: $opCode")
+                }
+            }
+
+            StationManager.markDirty(context.player.server?.getWorld(World.OVERWORLD)!!)
         }
 
         ServerWorldEvents.LOAD.register(ServerWorldEvents.Load { _, world ->

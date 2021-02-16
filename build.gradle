@@ -80,3 +80,5 @@ publishing {
         // mavenLocal()
     }
 }
+
+compileKotlin.kotlinOptions.jvmTarget = "1.8"

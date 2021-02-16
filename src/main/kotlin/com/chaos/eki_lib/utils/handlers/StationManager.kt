@@ -6,8 +6,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
 
 internal object StationManager {
-    val stations: MutableList<Station> = mutableListOf()
-        get() = field.toMutableList()
+    private val stations: MutableList<Station> = mutableListOf()
 
     fun init(stations: MutableList<Station>) =
         this.stations.addAll(stations)
@@ -19,6 +18,8 @@ internal object StationManager {
 
     private fun clear() =
         stations.clear()
+
+    fun getStationList(): MutableList<Station> = stations.toMutableList()
 
     fun has(blockPos: BlockPos): Boolean =
         stations.any { it.pos == blockPos }
