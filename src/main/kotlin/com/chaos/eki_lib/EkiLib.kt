@@ -1,5 +1,6 @@
 package com.chaos.eki_lib
 
+import com.chaos.eki_lib.objects.items.StationTunerItem
 import com.chaos.eki_lib.station.StationWorldData
 import com.chaos.eki_lib.station.data.OpCode
 import com.chaos.eki_lib.station.data.Station
@@ -8,18 +9,26 @@ import io.netty.buffer.Unpooled
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.minecraft.item.Item
+import net.minecraft.item.ItemGroup
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
+import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
 
 object EkiLib : ModInitializer {
     const val MODID = "eki_lib"
     const val MODNAME = "Eki Lib"
 
+    val STATION_TUNER = StationTunerItem()
+
+
     val S2C_SERVER_RETURN_STATION_LIST = Identifier(MODID, "s2c_server_ret_sta")
 
     override fun onInitialize() {
+        registerItems()
+
         ServerSidePacketRegistry.INSTANCE.register(
             EkiLibClient.C2S_CLIENT_REQUEST_STATIONS
         ) { context, _ ->
@@ -28,7 +37,7 @@ object EkiLib : ModInitializer {
                 val stations = StationManager.getStationList()
 
                 data.writeInt(stations.size)
-                stations.forEach { it.toByteBuf(data); println(it) }
+                stations.forEach { it.toByteBuf(data) }
                 ServerSidePacketRegistry.INSTANCE.sendToPlayer(
                     context.player,
                     S2C_SERVER_RETURN_STATION_LIST,
@@ -62,6 +71,10 @@ object EkiLib : ModInitializer {
                 StationManager.init(saver.stations)
             }
         })
+    }
+
+    private fun registerItems() {
+        Registry.register(Registry.ITEM, Identifier(MODID, "station_tuner"), STATION_TUNER)
     }
 
     private fun isServerOverWorld(world: ServerWorld): Boolean =

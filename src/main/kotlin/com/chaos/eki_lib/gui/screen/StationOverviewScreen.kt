@@ -2,6 +2,7 @@ package com.chaos.eki_lib.gui.screen
 
 import com.chaos.eki_lib.EkiLibClient
 import com.chaos.eki_lib.gui.widget.StationSelectionWidget
+import com.chaos.eki_lib.objects.items.StationTunerItem
 import com.chaos.eki_lib.station.data.OpCode
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
@@ -16,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 
 @Environment(EnvType.CLIENT)
@@ -87,7 +89,8 @@ class StationOverviewScreen(previous: Screen?, dimension: Identifier, player: Pl
             val texts = mutableListOf<Text>()
             texts += TranslatableText("eki_lib.screen.bind.description")
 
-            // if (!player.mainHandStack.item is )
+            if (player.mainHandStack.item !is StationTunerItem)
+                texts += TranslatableText("eki_lib.screen.bind.warning").formatted(Formatting.RED)
 
             renderTooltip(
                 p2,

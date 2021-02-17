@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
-data class Station(var name: String, val pos: BlockPos, var level: StationLevel, val dimensionID: Identifier) {
+data class Station(var name: String, val pos: BlockPos, var level: StationLevel, val dimension: Identifier) {
     companion object {
         fun fromTag(tag: CompoundTag): Station =
             Station(
@@ -34,7 +34,7 @@ data class Station(var name: String, val pos: BlockPos, var level: StationLevel,
         tag.putString(TagFacts.Station.NAME, name)
         tag.putIntArray(TagFacts.Station.POS, pos.asArray())
         tag.putString(TagFacts.Station.LEVEL, level.name)
-        tag.putString(TagFacts.Station.DIMENSION, dimensionID.toString())
+        tag.putString(TagFacts.Station.DIMENSION, dimension.toString())
 
         return tag
     }
@@ -43,7 +43,7 @@ data class Station(var name: String, val pos: BlockPos, var level: StationLevel,
         byteBuf.writeString(name, 100)
         byteBuf.writeBlockPos(pos)
         byteBuf.writeEnumConstant(level)
-        byteBuf.writeIdentifier(dimensionID)
+        byteBuf.writeIdentifier(dimension)
 
         return byteBuf
     }
