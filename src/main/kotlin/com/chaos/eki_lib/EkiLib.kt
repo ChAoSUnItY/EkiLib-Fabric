@@ -1,18 +1,16 @@
 package com.chaos.eki_lib
 
-import com.chaos.eki_lib.objects.items.StationTunerItem
 import com.chaos.eki_lib.station.StationWorldData
 import com.chaos.eki_lib.station.data.OpCode
 import com.chaos.eki_lib.station.data.Station
 import com.chaos.eki_lib.utils.TagFacts
+import com.chaos.eki_lib.utils.handlers.RegistryHandler
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.fabricmc.fabric.api.server.PlayerStream
-import net.minecraft.item.Item
-import net.minecraft.item.ItemGroup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.world.ServerWorld
@@ -24,12 +22,12 @@ object EkiLib : ModInitializer {
     const val MODID = "eki_lib"
     const val MODNAME = "Eki Lib"
 
-    val STATION_TUNER = StationTunerItem()
-
     val S2C_SERVER_RETURN_STATION_LIST = Identifier(MODID, "s2c_server_ret_sta")
 
     override fun onInitialize() {
         registerItems()
+        registerBlocks()
+        registerBlockEntities()
 
         ServerSidePacketRegistry.INSTANCE.register(
             EkiLibClient.C2S_CLIENT_REQUEST_STATIONS
@@ -106,7 +104,18 @@ object EkiLib : ModInitializer {
     }
 
     private fun registerItems() {
-        Registry.register(Registry.ITEM, Identifier(MODID, "station_tuner"), STATION_TUNER)
+        for ((id, item) in RegistryHandler.itemMap)
+            Registry.register(Registry.ITEM, id, item)
+    }
+
+    private fun registerBlocks() {
+        for ((id, block) in RegistryHandler.blockMap)
+            Registry.register(Registry.BLOCK, id, block)
+    }
+
+    private fun registerBlockEntities() {
+        for ((id, blockEntityType) in RegistryHandler.blockEntityMap)
+            Registry.register(Registry.BLOCK_ENTITY_TYPE, id, blockEntityType)
     }
 
     private fun isServerOverWorld(world: ServerWorld): Boolean =

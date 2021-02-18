@@ -1,6 +1,5 @@
 package com.chaos.eki_lib.gui.screen
 
-import com.chaos.eki_lib.EkiLib
 import com.chaos.eki_lib.EkiLibClient
 import com.chaos.eki_lib.gui.widget.StationSelectionWidget
 import com.chaos.eki_lib.objects.items.StationTunerItem
@@ -25,8 +24,8 @@ import net.minecraft.util.Identifier
 @Environment(EnvType.CLIENT)
 class StationOverviewScreen(previous: Screen?, dimension: Identifier, player: PlayerEntity) :
     BaseScreen(Text.of(""), previous, dimension, player) {
-    lateinit var refactorButton: ButtonWidget
-    lateinit var removeButton: ButtonWidget
+    private lateinit var refactorButton: ButtonWidget
+    private lateinit var removeButton: ButtonWidget
     lateinit var bindButton: ButtonWidget
     lateinit var listWidget: StationSelectionWidget
 
