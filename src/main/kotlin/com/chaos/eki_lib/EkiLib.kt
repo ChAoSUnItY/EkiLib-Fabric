@@ -4,13 +4,16 @@ import com.chaos.eki_lib.objects.items.StationTunerItem
 import com.chaos.eki_lib.station.StationWorldData
 import com.chaos.eki_lib.station.data.OpCode
 import com.chaos.eki_lib.station.data.Station
+import com.chaos.eki_lib.utils.TagFacts
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
@@ -22,7 +25,6 @@ object EkiLib : ModInitializer {
     const val MODNAME = "Eki Lib"
 
     val STATION_TUNER = StationTunerItem()
-
 
     val S2C_SERVER_RETURN_STATION_LIST = Identifier(MODID, "s2c_server_ret_sta")
 
@@ -36,6 +38,7 @@ object EkiLib : ModInitializer {
                 val data = PacketByteBuf(Unpooled.buffer())
                 val stations = StationManager.getStationList()
 
+                data.writeBoolean(true)
                 data.writeInt(stations.size)
                 stations.forEach { it.toByteBuf(data) }
                 ServerSidePacketRegistry.INSTANCE.sendToPlayer(
@@ -59,9 +62,38 @@ object EkiLib : ModInitializer {
                     OpCode.DELETE -> StationManager.removeStation(station.pos)
                     else -> println("Unknown Operation to Station Manager: $opCode")
                 }
-            }
 
-            StationManager.markDirty(context.player.server?.getWorld(World.OVERWORLD)!!)
+                StationManager.markDirty(context.player.server?.getWorld(World.OVERWORLD)!!)
+
+                val returnData = PacketByteBuf(Unpooled.buffer())
+                val stations = StationManager.getStationList()
+
+                data.writeBoolean(false)
+                data.writeInt(stations.size)
+                stations.forEach { it.toByteBuf(data) }
+
+                PlayerStream.all(context.player.server).forEach {
+                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(
+                        it,
+                        S2C_SERVER_RETURN_STATION_LIST,
+                        returnData
+                    )
+                }
+            }
+        }
+
+        ServerSidePacketRegistry.INSTANCE.register(
+            EkiLibClient.C2S_CLIENT_BIND_TUNER
+        ) { context, data ->
+            val tag = CompoundTag()
+            tag.putIntArray(
+                TagFacts.Station.POS,
+                data.readIntArray()
+            )
+
+            context.taskQueue.execute {
+                context.player.mainHandStack.tag = tag
+            }
         }
 
         ServerWorldEvents.LOAD.register(ServerWorldEvents.Load { _, world ->

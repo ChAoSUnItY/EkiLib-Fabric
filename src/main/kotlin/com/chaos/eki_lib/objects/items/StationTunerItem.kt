@@ -4,16 +4,24 @@ import com.chaos.eki_lib.station.data.Station
 import com.chaos.eki_lib.utils.TagFacts
 import com.chaos.eki_lib.utils.extensions.UtilBlockPos
 import com.chaos.eki_lib.utils.extensions.asArray
+import com.chaos.eki_lib.utils.extensions.format
 import com.chaos.eki_lib.utils.handlers.StationManager
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.minecraft.client.Keyboard
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.item.TooltipContext
+import net.minecraft.client.options.KeyBinding
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.world.World
+import kotlin.reflect.full.memberProperties
 
 class StationTunerItem : Item(Settings().maxCount(1).group(ItemGroup.MISC)) {
     override fun appendTooltip(
@@ -23,7 +31,7 @@ class StationTunerItem : Item(Settings().maxCount(1).group(ItemGroup.MISC)) {
         context: TooltipContext?
     ) {
         val tag = stack?.tag
-        val boundStation = getBoundStation(tag, world)
+        val boundStation = getBoundStation(stack, tag, world)
         val tooltipText = if (boundStation != null) {
             TranslatableText(
                 "${getTranslationKey(stack)}.tooltip",
@@ -39,17 +47,66 @@ class StationTunerItem : Item(Settings().maxCount(1).group(ItemGroup.MISC)) {
             )
         }
 
-        tooltip?.plusAssign(tooltipText.formatted(Formatting.GRAY))
+        tooltip?.add(tooltipText.formatted(Formatting.GRAY))
+        if (boundStation != null) {
+            tooltip?.add(
+                TranslatableText(
+                    "eki_lib.shift.tooltip"
+                )
+            )
+
+            if (Screen.hasShiftDown()) {
+                tooltip?.removeLast()
+                val (name, pos, level, dimension) = boundStation
+                tooltip?.add(
+                    TranslatableText(
+                        "eki_lib.station.name"
+                    ).append(
+                        ": $name"
+                    )
+                )
+                tooltip?.add(
+                    TranslatableText(
+                        "eki_lib.station.pos"
+                    ).append(
+                        ": ${pos.format()}"
+                    )
+                )
+                tooltip?.add(
+                    TranslatableText(
+                        "eki_lib.station.level"
+                    ).append(
+                        ": "
+                    ).append(
+                        TranslatableText(
+                            level.getTranslationKey()
+                        )
+                    )
+                )
+                tooltip?.add(
+                    TranslatableText(
+                        "eki_lib.station.dimension"
+                    ).append(
+                        ": ${dimension.path.capitalize()}"
+                    )
+                )
+            }
+        }
     }
 
-    private fun getBoundStation(tag: CompoundTag?, world: World?): Station? {
+    private fun getBoundStation(stack: ItemStack?, tag: CompoundTag?, world: World?): Station? {
         return if (tag == null || !tag.contains(TagFacts.Station.POS))
             null
         else {
             val targetPos = UtilBlockPos.fromArray(tag.getIntArray(TagFacts.Station.POS))
+            val boundStation = StationManager.getStationList()
+                .filter { it.pos == targetPos && it.dimension == world?.registryKey?.value }
+                .getOrElse(0) { Station.DUMMY }
 
-            StationManager.getStationList()
-                .filter { it.pos == targetPos && it.dimension == world?.registryKey?.value }[0]
+            if (boundStation == Station.DUMMY)
+                stack?.tag?.remove(TagFacts.Station.POS)
+
+            boundStation
         }
     }
 }

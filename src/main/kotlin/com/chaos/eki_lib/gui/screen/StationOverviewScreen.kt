@@ -1,9 +1,11 @@
 package com.chaos.eki_lib.gui.screen
 
+import com.chaos.eki_lib.EkiLib
 import com.chaos.eki_lib.EkiLibClient
 import com.chaos.eki_lib.gui.widget.StationSelectionWidget
 import com.chaos.eki_lib.objects.items.StationTunerItem
 import com.chaos.eki_lib.station.data.OpCode
+import com.chaos.eki_lib.utils.extensions.asArray
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
@@ -83,7 +85,14 @@ class StationOverviewScreen(previous: Screen?, dimension: Identifier, player: Pl
             20,
             TranslatableText("eki_lib.screen.bind"),
             {
+                val data = PacketByteBuf(Unpooled.buffer())
+                val station = listWidget.focused?.station!!
+                data.writeIntArray(station.pos.asArray())
 
+                ClientSidePacketRegistry.INSTANCE.sendToServer(
+                    EkiLibClient.C2S_CLIENT_BIND_TUNER,
+                    data
+                )
             }
         ) { _, p2, p3, p4 ->
             val texts = mutableListOf<Text>()

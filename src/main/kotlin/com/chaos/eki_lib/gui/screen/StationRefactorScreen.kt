@@ -5,6 +5,7 @@ import com.chaos.eki_lib.station.data.OpCode
 import com.chaos.eki_lib.station.data.Station
 import com.chaos.eki_lib.station.data.StationLevel
 import com.chaos.eki_lib.utils.extensions.asArray
+import com.chaos.eki_lib.utils.extensions.format
 import com.chaos.eki_lib.utils.handlers.StationManager
 import io.netty.buffer.Unpooled
 import net.fabricmc.api.EnvType
@@ -53,7 +54,7 @@ class StationRefactorScreen(
             20,
             TranslatableText("eki_lib.screen.${if (targetStation == null) "create" else "modify"}")
         ) {
-            val station = Station(stationNameTextField.text, player.blockPos, level, dimension)
+            val station = Station(stationNameTextField.text, position, level, dimension)
 
             val operationSuccess = if (targetStation != null)
                 StationManager.replaceStation(station)
@@ -91,7 +92,7 @@ class StationRefactorScreen(
             20,
             Text.of("<")
         ) {
-            level.previous()
+            level = level.previous()
         })
         addButton(ButtonWidget(
             width / 2 + 150,
@@ -100,7 +101,7 @@ class StationRefactorScreen(
             20,
             Text.of(">")
         ) {
-            level.next()
+            level = level.next()
         })
         super.init()
         stationNameTextField = TextFieldWidget(
@@ -148,10 +149,7 @@ class StationRefactorScreen(
         drawTextWithShadow(
             matrices,
             textRenderer,
-            TranslatableText(
-                "eki_lib.station.pos",
-                *position.asArray().toTypedArray()
-            ),
+            TranslatableText("eki_lib.station.pos").append(": ${position.format()}"),
             width / 2 + 110,
             height / 2 - 110,
             white
@@ -159,10 +157,7 @@ class StationRefactorScreen(
         drawTextWithShadow(
             matrices,
             textRenderer,
-            TranslatableText(
-                "eki_lib.station.level",
-                level.toTranslated().string
-            ),
+            TranslatableText("eki_lib.station.level").append(": ${level.toTranslated().string}"),
             width / 2 + 110,
             height / 2 - 90,
             white

@@ -27,6 +27,7 @@ object EkiLibClient : ClientModInitializer {
 
     val C2S_CLIENT_REQUEST_STATIONS = Identifier(EkiLib.MODID, "c2s_client_req_sta")
     val C2S_CLIENT_UPDATE_STATIONS = Identifier(EkiLib.MODID, "c2s_client_upd_sta")
+    val C2S_CLIENT_BIND_TUNER = Identifier(EkiLib.MODID, "c2s_client_bind_tuner")
 
     override fun onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick {
@@ -39,6 +40,7 @@ object EkiLibClient : ClientModInitializer {
         })
 
         ClientSidePacketRegistry.INSTANCE.register(EkiLib.S2C_SERVER_RETURN_STATION_LIST) { context, data ->
+            val pureUpdate = data.readBoolean()
             val size = data.readInt()
             val stations = mutableListOf<Station>()
 

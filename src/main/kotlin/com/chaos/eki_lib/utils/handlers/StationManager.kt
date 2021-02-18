@@ -33,9 +33,11 @@ internal object StationManager {
     }
 
     fun replaceStation(station: Station): Boolean {
-        for (i in stations.indices) if (stations[i].pos == station.pos) {
-            stations[i] = station
-            return true
+        for (i in stations.indices) {
+            if (stations[i].pos == station.pos) {
+                stations[i] = station
+                return true
+            }
         }
         return false
     }

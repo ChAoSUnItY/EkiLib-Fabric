@@ -12,6 +12,8 @@ import net.minecraft.world.World
 
 data class Station(var name: String, val pos: BlockPos, var level: StationLevel, val dimension: Identifier) {
     companion object {
+        val DUMMY = Station("DUMMY", BlockPos(-1, -1, -1), StationLevel.NON, World.OVERWORLD.value)
+
         fun fromTag(tag: CompoundTag): Station =
             Station(
                 tag.getString(TagFacts.Station.NAME),
