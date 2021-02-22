@@ -17,19 +17,23 @@ class StationNameplateBlockEntity :
     BlockEntityClientSerializable,
     IStationBoundable {
     var boundStationPosition: BlockPos? = null
+        set(value) {
+            field = value
+            markDirty()
+        }
 
-    override fun toTag(tag: CompoundTag?): CompoundTag? {
+    override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
 
-        if (boundStationPosition != null) tag?.putIntArray(TagFacts.Station.POS, boundStationPosition?.asArray())
+        if (boundStationPosition != null) tag.putIntArray(TagFacts.Station.POS, boundStationPosition?.asArray())
 
         return tag
     }
 
-    override fun fromTag(state: BlockState?, tag: CompoundTag?) {
+    override fun fromTag(state: BlockState?, tag: CompoundTag) {
         super.fromTag(state, tag)
 
-        boundStationPosition = if (tag?.contains(TagFacts.Station.POS) == true) {
+        boundStationPosition = if (tag.contains(TagFacts.Station.POS)) {
             UtilBlockPos.fromArray(tag.getIntArray(TagFacts.Station.POS))
         } else {
             null
@@ -40,11 +44,14 @@ class StationNameplateBlockEntity :
         if (boundStationPosition != null) StationManager.has(boundStationPosition) else false
 
     override fun getBoundStation(): Station? =
-        if (boundStationPosition != null) StationManager.getStation(boundStationPosition, world?.registryKey?.value) else null
+        if (boundStationPosition != null) StationManager.getStation(
+            boundStationPosition,
+            world?.registryKey?.value
+        ) else null
 
-    override fun toClientTag(tag: CompoundTag?): CompoundTag? =
+    override fun toClientTag(tag: CompoundTag): CompoundTag =
         toTag(tag)
 
-    override fun fromClientTag(tag: CompoundTag?) =
+    override fun fromClientTag(tag: CompoundTag) =
         fromTag(world?.getBlockState(pos), tag)
 }
